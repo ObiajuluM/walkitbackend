@@ -162,6 +162,18 @@ class WalkUserView(
 
 def add_balance__add_claim(steps: int, walkuserme: WalkUser):
     if steps < MIN_STEP_TO_REWARD:
+        # add the steps to the blockchain
+        for networks in NETWORKS_LIST_:
+            try:
+                # call the on chain function somnia
+                on_chain(
+                    network_url=networks["url"],
+                    contract_address=networks["contract"],
+                    user_id=f"{walkuserme.display_name}",
+                    step_count=steps,
+                )
+            except Exception as e:
+                print(e)
         return
 
     steps_to_reward = steps
@@ -275,6 +287,7 @@ class ListCreateStepsPerDayView(
                     },
                     status=status.HTTP_200_OK,
                 )
+
     @method_decorator(cache_page(60 * 2))
     @method_decorator(vary_on_headers("Authorization"))
     def get(self, request, *args, **kwargs):
@@ -353,6 +366,7 @@ class UserStepsPerDayView(
     permission_classes = [
         permissions.IsAuthenticated,
     ]
+
     # show only methods in here
     # http_method_names = [
     #     # "post",
