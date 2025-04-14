@@ -161,6 +161,8 @@ class WalkUserView(
 
 
 def add_balance__add_claim(steps: int, walkuserme: WalkUser):
+    print("add balance and add claim")
+
     if steps < MIN_STEP_TO_REWARD:
         # add the steps to the blockchain
         for networks in NETWORKS_LIST_:
@@ -197,6 +199,7 @@ def add_balance__add_claim(steps: int, walkuserme: WalkUser):
 
     new_claim.save()
     walkuserme.save()
+    print("love shown success")
 
     # add the steps to the blockchain
     for networks in NETWORKS_LIST_:
@@ -242,9 +245,7 @@ class ListCreateStepsPerDayView(
 
                 # stepn = serializer.validated_data.get("steps")
                 stepn = int(self.request.data.get("steps"))
-
                 user_steps_per_day.steps = stepn
-                user_steps_per_day.save()
 
                 # TODO: if StepsPerDay.objects.time == today : pass
                 if (
@@ -259,16 +260,17 @@ class ListCreateStepsPerDayView(
                         status=status.HTTP_200_OK,
                     )
                 else:
-                    # show love
                     add_balance__add_claim(steps=stepn, walkuserme=walkuser)
+                    print("AAAAAAAAAAAAAAAAAAAAAAAA")
+                    user_steps_per_day.save()
 
-                return response.Response(
-                    data={
-                        "steps": user_steps_per_day.steps,
-                        "time": user_steps_per_day.time,
-                    },
-                    status=status.HTTP_200_OK,
-                )
+                    return response.Response(
+                        data={
+                            "steps": user_steps_per_day.steps,
+                            "time": user_steps_per_day.time,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
             # use this if this if step per day == null
             except StepsPerDay.DoesNotExist:
                 stepn = int(self.request.data.get("steps"))
@@ -279,6 +281,9 @@ class ListCreateStepsPerDayView(
 
                 # call the show love function
                 add_balance__add_claim(steps=stepn, walkuserme=walkuser)
+
+                # save
+                user_steps_per_day.save()
 
                 return response.Response(
                     data={
@@ -338,7 +343,7 @@ class ClaimView(generics.ListAPIView):
         # email = self.kwargs["email"]
         if self.request.user.is_authenticated:
             walkuser = WalkUser.objects.get(email=self.request.user.email)
-            return Claim.objects.filter(walkuser=walkuser).order_by("time")
+            return Claim.objects.filter(walkuser=walkuser).order_by("-time")
 
 
 class InviteView(generics.ListAPIView):
@@ -372,8 +377,8 @@ class UserStepsPerDayView(
     #     # "post",
     #     "get",
     # ]
-    @method_decorator(cache_page(60 * 2))
-    @method_decorator(vary_on_headers("Authorization"))
+    # @method_decorator(cache_page(60 * 2))
+    # @method_decorator(vary_on_headers("Authorization"))
     def get(self, request):
         if self.request.user.is_authenticated:
             walkuser = WalkUser.objects.get(email=self.request.user.email)

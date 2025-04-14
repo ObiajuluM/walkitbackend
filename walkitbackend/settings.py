@@ -130,7 +130,6 @@ WSGI_APPLICATION = "walkitbackend.wsgi.application"
 
 
 # for prod
-
 DATABASES = {
     "default": {
         "ENGINE": os.getenv("DATABASE_ENGINE", "django.db.backends.sqlite3"),
